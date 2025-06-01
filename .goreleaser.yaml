@@ -1,65 +1,66 @@
-# .goreleaser.yml
 project_name: tikuAdapter
-
 before:
   hooks:
     - sh buildweb.sh
-
 builds:
-  - id: tikuAdapter # 给构建一个 ID 是个好习惯
-    main: ./cmd/adapter-service
-    binary: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}" # 更清晰的二进制命名
-    env:
-      - CGO_ENABLED=0
-      # GO111MODULE=on  # 在较新的Go版本中通常是默认的，可以省略
-    ldflags:
-      - -s -w
-      - "{{ if eq .Os \"linux\" }}-extldflags '-static'{{ end }}"
-    goos:
-      - linux       # 主要
-      - windows     # 主要
-      - darwin      # 主要
-      - freebsd     # 常见的 BSD
-      - openbsd   # 如果有需求
-      - netbsd    # 如果有需求
-      - solaris   # 如果有需求
-      - aix       # 如果有需求 (通常需要特定环境)
-    goarch:
-      - amd64     # x86_64
-      - arm64     # 64-bit ARM
-      - "386"     # 32-bit x86 (对 Windows 和一些 Linux 仍有意义)
-      - arm       # 32-bit ARM (对 Linux, Windows IoT, FreeBSD 等)
-      - riscv64 # 新兴的开放指令集 (主要用于 Linux)
-      - ppc64le # PowerPC Little Endian (主要用于 Linux)
-      - s390x   # IBM Z (主要用于 Linux)
-      - mips64le # MIPS 64-bit Little Endian (嵌入式，Linux)
-      - mipsle  # MIPS 32-bit Little Endian (嵌入式，Linux)
-    goarm: # 为 arm 架构指定 ARM 版本 (如果需要兼容旧设备)
-      - "6"
-      - "7"
+  - main: ./cmd/adapter-service
     ignore:
       - goos: darwin
-        goarch: "386"
-      - goos: darwin
         goarch: arm
-
+      - goos: darwin
+        goarch: '386'
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: '386'
+    goos:
+      - aix
+      - android
+      - darwin
+      - dragonfly
+      - freebsd
+      - illumos
+      - ios
+      - js
+      - linux
+      - nacl
+      - netbsd
+      - openbsd
+      - plan9
+      - solaris
+      - windows
+      - zos
+    goarch:
+      - '386'
+      - amd64
+      - amd64p32
+      - arm
+      - arm64
+      - loong64
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+      - mips64p32
+      - mips64p32le
+      - ppc
+      - ppc64
+      - ppc64le
+      - riscv64
+      - s390
+      - s390x
+      - sparc
+      - sparc64
+      - wasm
+    ldflags: "-s -w -extldflags '-static'"
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
 checksum:
   name_template: checksums.txt
-
-archives:
-  - id: tikuAdapter-archives
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    format_overrides:
-      - goos: windows
-        format: zip
-    files:
-      - LICENSE
-      - README.md
-
 changelog:
   sort: desc
   filters:
     exclude:
       - '^ci:'
       - '^CI:'
-      - '^(build|chore|docs|test):'
