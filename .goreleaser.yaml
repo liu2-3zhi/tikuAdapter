@@ -5,19 +5,16 @@ before:
 builds:
   - main: ./cmd/adapter-service
     ignore:
-      # 新增的 ignore 基于错误日志和文档
-      - goos: plan9 # plan9 通常与 amd64p32 和 386, arm 关联
-        goarch: amd64p32
-      - goos: linux # 或者其他 goos 如果 mips64p32le 曾被尝试用于它们
-        goarch: mips64p32le
-      - goarch: ppc # 过于笼统，优先使用 ppc64, ppc64le
+      # 新增的忽略规则，基于错误和文档
+      - goos: plan9 # Plan9 对一些架构的支持可能不完整或导致问题
+        goarch: amd64p32 # 已移除
+      - goarch: amd64p32 # 已移除
+      - goarch: mips64p32le # 不明确支持
+      - goarch: ppc # 优先使用 ppc64 和 ppc64le
       - goarch: s390 # 优先使用 s390x
-      - goarch: sparc
-      # sparc64 虽然在 linux/sparc64 中被提及，但如果导致问题也可以忽略
-      # - goarch: sparc64
-      - goos: nacl # 已被移除
-      - goos: zos # GoReleaser 可能支持不佳
-
+      - goarch: sparc # 优先使用 sparc64
+      - goos: nacl # 已从 Go 1.14 移除
+      - goos: zos # 支持不明确或不完整
     goos:
       - aix
       - android
@@ -34,11 +31,11 @@ builds:
       - plan9
       - solaris
       - windows
-      # - zos # 暂时注释掉，如果仍有问题
+      # - zos # 移除
     goarch:
       - '386'
       - amd64
-      # - amd64p32 # 已移除
+      # - amd64p32 # 移除
       - arm
       - arm64
       - loong64
@@ -46,16 +43,16 @@ builds:
       - mipsle
       - mips64
       - mips64le
-      # - mips64p32 # 如果 plan9/mips64p32 是目标，否则可能也有问题
-      # - mips64p32le # 已被忽略
-      # - ppc # 已被忽略
+      # - mips64p32 # Plan9 相关，可能引起问题
+      # - mips64p32le # 移除
+      # - ppc # 移除
       - ppc64
       - ppc64le
       - riscv64
-      # - s390 # 已被忽略
+      # - s390 # 移除
       - s390x
-      # - sparc # 已被忽略
-      - sparc64 # 如果 linux/sparc64 是明确目标且有效，否则也考虑忽略
+      # - sparc # 移除
+      - sparc64
       - wasm
     ldflags: "-s -w -extldflags '-static'"
     env:
