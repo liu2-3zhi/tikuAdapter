@@ -5,16 +5,21 @@ before:
 builds:
   - main: ./cmd/adapter-service
     ignore:
-      # 新增的忽略规则，基于错误和文档
-      - goos: plan9 # Plan9 对一些架构的支持可能不完整或导致问题
-        goarch: amd64p32 # 已移除
-      - goarch: amd64p32 # 已移除
-      - goarch: mips64p32le # 不明确支持
-      - goarch: ppc # 优先使用 ppc64 和 ppc64le
-      - goarch: s390 # 优先使用 s390x
-      - goarch: sparc # 优先使用 sparc64
-      - goos: nacl # 已从 Go 1.14 移除
-      - goos: zos # 支持不明确或不完整
+      - goos: darwin
+        goarch: arm
+      - goos: darwin
+        goarch: '386'
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: '386'
+      # 移除了之前针对 sparc/sparc64 的特定 ignore，因为它们将从 goarch 列表中移除
+      - goarch: amd64p32
+      - goarch: mips64p32le
+      - goarch: ppc
+      - goarch: s390
+      - goos: nacl
+      - goos: zos
     goos:
       - aix
       - android
@@ -25,17 +30,14 @@ builds:
       - ios
       - js
       - linux
-      # - nacl # 移除
       - netbsd
       - openbsd
       - plan9
       - solaris
       - windows
-      # - zos # 移除
     goarch:
       - '386'
       - amd64
-      # - amd64p32 # 移除
       - arm
       - arm64
       - loong64
@@ -43,16 +45,12 @@ builds:
       - mipsle
       - mips64
       - mips64le
-      # - mips64p32 # Plan9 相关，可能引起问题
-      # - mips64p32le # 移除
-      # - ppc # 移除
+      # - mips64p32 # Plan9 相关，且不在 'go tool dist list' 的主要组合中
       - ppc64
       - ppc64le
       - riscv64
-      # - s390 # 移除
       - s390x
-      # - sparc # 移除
-      - sparc64
+      # - sparc64 # 根据 'go tool dist list' 移除
       - wasm
     ldflags: "-s -w -extldflags '-static'"
     env:
