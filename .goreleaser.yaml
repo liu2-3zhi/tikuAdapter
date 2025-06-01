@@ -4,15 +4,6 @@ before:
     - sh buildweb.sh
 builds:
   - main: ./cmd/adapter-service
-    ignore:
-      - goos: darwin
-        goarch: arm
-      - goos: darwin
-        goarch: '386'
-      - goos: windows
-        goarch: arm
-      - goos: windows
-        goarch: '386'
     goos:
       - aix
       - android
@@ -23,7 +14,6 @@ builds:
       - ios
       - js
       - linux
-      - nacl
       - netbsd
       - openbsd
       - plan9
