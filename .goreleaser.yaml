@@ -4,6 +4,20 @@ before:
     - sh buildweb.sh
 builds:
   - main: ./cmd/adapter-service
+    ignore:
+      # 新增的 ignore 基于错误日志和文档
+      - goos: plan9 # plan9 通常与 amd64p32 和 386, arm 关联
+        goarch: amd64p32
+      - goos: linux # 或者其他 goos 如果 mips64p32le 曾被尝试用于它们
+        goarch: mips64p32le
+      - goarch: ppc # 过于笼统，优先使用 ppc64, ppc64le
+      - goarch: s390 # 优先使用 s390x
+      - goarch: sparc
+      # sparc64 虽然在 linux/sparc64 中被提及，但如果导致问题也可以忽略
+      # - goarch: sparc64
+      - goos: nacl # 已被移除
+      - goos: zos # GoReleaser 可能支持不佳
+
     goos:
       - aix
       - android
@@ -14,15 +28,17 @@ builds:
       - ios
       - js
       - linux
+      # - nacl # 移除
       - netbsd
       - openbsd
       - plan9
       - solaris
       - windows
-      - zos
+      # - zos # 暂时注释掉，如果仍有问题
     goarch:
       - '386'
       - amd64
+      # - amd64p32 # 已移除
       - arm
       - arm64
       - loong64
@@ -30,10 +46,16 @@ builds:
       - mipsle
       - mips64
       - mips64le
+      # - mips64p32 # 如果 plan9/mips64p32 是目标，否则可能也有问题
+      # - mips64p32le # 已被忽略
+      # - ppc # 已被忽略
       - ppc64
       - ppc64le
       - riscv64
+      # - s390 # 已被忽略
       - s390x
+      # - sparc # 已被忽略
+      - sparc64 # 如果 linux/sparc64 是明确目标且有效，否则也考虑忽略
       - wasm
     ldflags: "-s -w -extldflags '-static'"
     env:
