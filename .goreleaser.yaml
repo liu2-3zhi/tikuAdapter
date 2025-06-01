@@ -4,6 +4,10 @@ before:
     - sh buildweb.sh
 builds:
   - main: ./cmd/adapter-service
+    ldflags: "-s -w -extldflags '-static'"
+    env:
+      - CGO_ENABLED=0 # 全局禁用 CGO
+      - GO111MODULE=on
     ignore:
       - goos: darwin
         goarch: arm
@@ -13,7 +17,7 @@ builds:
         goarch: arm
       - goos: windows
         goarch: '386'
-      # 移除了之前针对 sparc/sparc64 的特定 ignore，因为它们将从 goarch 列表中移除
+      # 以下是之前确认需要忽略的
       - goarch: amd64p32
       - goarch: mips64p32le
       - goarch: ppc
@@ -45,17 +49,38 @@ builds:
       - mipsle
       - mips64
       - mips64le
-      # - mips64p32 # Plan9 相关，且不在 'go tool dist list' 的主要组合中
+      # - mips64p32 # Plan9 相关，且不在 'go tool dist list' 的主要组合中, 保持移除
       - ppc64
       - ppc64le
       - riscv64
       - s390x
-      # - sparc64 # 根据 'go tool dist list' 移除
       - wasm
-    ldflags: "-s -w -extldflags '-static'"
-    env:
-      - CGO_ENABLED=0
-      - GO111MODULE=on
+    overrides:
+      - goos: android
+        goarch: amd64
+        env:
+          - CGO_ENABLED=1 # 仅为 android/amd64 启用 CGO
+      - goos: android # 通常 android 的其他架构也可能需要 CGO
+        goarch: arm
+        env:
+          - CGO_ENABLED=1
+      - goos: android
+        goarch: arm64
+        env:
+          - CGO_ENABLED=1
+      - goos: android
+        goarch: '386'
+        env:
+          - CGO_ENABLED=1
+      # iOS 构建也总是需要 CGO
+      - goos: ios
+        goarch: amd64 # simulator
+        env:
+          - CGO_ENABLED=1
+      - goos: ios
+        goarch: arm64 # device
+        env:
+          - CGO_ENABLED=1
 checksum:
   name_template: checksums.txt
 changelog:
