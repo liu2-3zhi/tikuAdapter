@@ -4,9 +4,10 @@ before:
     - sh buildweb.sh
 builds:
   - main: ./cmd/adapter-service
+    # 全局 ldflags，会被 Android/iOS 的覆盖
     ldflags: "-s -w -extldflags '-static'"
     env:
-      - CGO_ENABLED=0 # 全局禁用 CGO
+      - CGO_ENABLED=0 # 全局默认禁用 CGO
       - GO111MODULE=on
     ignore:
       - goos: darwin
@@ -17,13 +18,14 @@ builds:
         goarch: arm
       - goos: windows
         goarch: '386'
-      # 以下是之前确认需要忽略的
+      # 之前确认需要忽略的架构
       - goarch: amd64p32
       - goarch: mips64p32le
       - goarch: ppc
       - goarch: s390
       - goos: nacl
       - goos: zos
+      # android_arm_6 的构建将被下面的 goarm: ["7"] 覆盖，所以理论上不会再尝试
     goos:
       - aix
       - android
@@ -49,38 +51,46 @@ builds:
       - mipsle
       - mips64
       - mips64le
-      # - mips64p32 # Plan9 相关，且不在 'go tool dist list' 的主要组合中, 保持移除
       - ppc64
       - ppc64le
       - riscv64
       - s390x
       - wasm
     overrides:
+      # Android 平台覆盖
       - goos: android
-        goarch: amd64
-        env:
-          - CGO_ENABLED=1 # 仅为 android/amd64 启用 CGO
-      - goos: android # 通常 android 的其他架构也可能需要 CGO
         goarch: arm
+        goarm: ["7"] # 明确为 android/arm 使用 ARMv7
         env:
           - CGO_ENABLED=1
+        ldflags: "-s -w" # 移除 -static，Android 通常需要 PIE
       - goos: android
         goarch: arm64
         env:
           - CGO_ENABLED=1
+        ldflags: "-s -w" # 移除 -static
+      - goos: android
+        goarch: amd64
+        env:
+          - CGO_ENABLED=1
+        ldflags: "-s -w" # 移除 -static
       - goos: android
         goarch: '386'
         env:
           - CGO_ENABLED=1
-      # iOS 构建也总是需要 CGO
+        ldflags: "-s -w" # 移除 -static
+
+      # iOS 平台覆盖 (总是需要 CGO，可执行文件通常不完全静态链接)
       - goos: ios
-        goarch: amd64 # simulator
+        goarch: amd64 # 模拟器
         env:
           - CGO_ENABLED=1
+        ldflags: "-s -w"
       - goos: ios
-        goarch: arm64 # device
+        goarch: arm64 # 真机
         env:
           - CGO_ENABLED=1
+        ldflags: "-s -w"
 checksum:
   name_template: checksums.txt
 changelog:
